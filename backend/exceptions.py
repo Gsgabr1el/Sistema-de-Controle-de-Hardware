@@ -6,6 +6,27 @@ class DomainError(Exception):
         self.detail = detail
         super().__init__(detail)
 
+
 class UnauthorizedError(DomainError):
     status_code = 401
     code = "UNAUTHORIZED"
+
+class NotFoundError(DomainError):
+    status_code = 404
+    code = "NOT_FOUND"
+
+
+class BadRequestError(DomainError):
+    status_code = 400
+    code = "BAD_REQUEST"
+
+
+class ConflictError(DomainError):
+    status_code = 409
+    code = "CONFLICT"
+
+
+class UnauthorizedError(DomainError):
+    status_code = 401
+    code = "UNAUTHORIZED"
+
