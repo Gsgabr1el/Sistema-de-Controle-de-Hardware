@@ -1,0 +1,1447 @@
+<!doctype html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>HardwareCtrl</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			:root {
+				--bg: #06090f;
+				--bg2: #0b0f1a;
+				--surface: rgba(255, 255, 255, 0.04);
+				--surface2: rgba(255, 255, 255, 0.07);
+				--border: rgba(255, 255, 255, 0.07);
+				--border2: rgba(0, 230, 118, 0.18);
+				--accent: #00e676;
+				--accent2: #00c853;
+				--accent-dim: rgba(0, 230, 118, 0.12);
+				--accent-glow: rgba(0, 230, 118, 0.25);
+				--text: #e8ecf4;
+				--muted: #4a5168;
+				--muted2: #6b7491;
+				--red: #ff4d6d;
+				--yellow: #ffd166;
+				--blue: #4d9fff;
+				--radius: 12px;
+				--font: 'Inter', system-ui, sans-serif;
+			}
+
+			body {
+				font-family: var(--font);
+				background: var(--bg);
+				color: var(--text);
+				min-height: 100vh;
+			}
+
+			/* ════════════════ SCROLLBAR ════════════════ */
+			::-webkit-scrollbar {
+				width: 6px;
+				height: 6px;
+			}
+			::-webkit-scrollbar-track {
+				background: transparent;
+			}
+			::-webkit-scrollbar-thumb {
+				background: var(--border);
+				border-radius: 99px;
+			}
+
+			/* ════════════════ LOGIN ════════════════ */
+			#login-screen {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				min-height: 100vh;
+				position: relative;
+				overflow: hidden;
+			}
+
+			/* glow orbs de fundo */
+			#login-screen::before {
+				content: '';
+				position: absolute;
+				width: 700px;
+				height: 700px;
+				border-radius: 50%;
+				background: radial-gradient(circle, rgba(0, 230, 118, 0.12) 0%, transparent 70%);
+				top: -200px;
+				left: -200px;
+				pointer-events: none;
+			}
+
+			#login-screen::after {
+				content: '';
+				position: absolute;
+				width: 500px;
+				height: 500px;
+				border-radius: 50%;
+				background: radial-gradient(circle, rgba(0, 200, 83, 0.08) 0%, transparent 70%);
+				bottom: -150px;
+				right: -100px;
+				pointer-events: none;
+			}
+
+			.login-wrap {
+				position: relative;
+				z-index: 1;
+				width: 100%;
+				max-width: 420px;
+				padding: 20px;
+			}
+
+			.login-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 8px;
+				background: var(--accent-dim);
+				border: 1px solid var(--border2);
+				border-radius: 99px;
+				color: var(--accent);
+				font-size: 0.75rem;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				padding: 5px 14px;
+				text-transform: uppercase;
+				margin-bottom: 20px;
+			}
+
+			.login-badge::before {
+				content: '';
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: var(--accent);
+				box-shadow: 0 0 8px var(--accent);
+			}
+
+			.login-card {
+				background: rgba(255, 255, 255, 0.03);
+				backdrop-filter: blur(20px);
+				border: 1px solid var(--border);
+				border-radius: 20px;
+				padding: 40px 36px;
+				box-shadow:
+					0 32px 80px rgba(0, 0, 0, 0.6),
+					inset 0 1px 0 rgba(255, 255, 255, 0.06);
+			}
+
+			.login-card h1 {
+				font-size: 1.8rem;
+				font-weight: 800;
+				letter-spacing: -0.02em;
+				margin-bottom: 6px;
+				line-height: 1.2;
+			}
+
+			.login-card h1 span {
+				color: var(--accent);
+			}
+
+			.login-card .sub {
+				color: var(--muted2);
+				font-size: 0.88rem;
+				margin-bottom: 32px;
+			}
+
+			/* ════════════════ INPUTS ════════════════ */
+			.field {
+				margin-bottom: 16px;
+			}
+
+			label {
+				display: block;
+				font-size: 0.75rem;
+				color: var(--muted2);
+				font-weight: 500;
+				margin-bottom: 7px;
+				letter-spacing: 0.04em;
+				text-transform: uppercase;
+			}
+
+			input,
+			select {
+				width: 100%;
+				background: rgba(255, 255, 255, 0.05);
+				border: 1px solid var(--border);
+				border-radius: var(--radius);
+				color: var(--text);
+				font-family: var(--font);
+				font-size: 0.93rem;
+				padding: 11px 14px;
+				outline: none;
+				transition:
+					border-color 0.2s,
+					box-shadow 0.2s;
+			}
+
+			input::placeholder {
+				color: var(--muted);
+			}
+
+			input:focus,
+			select:focus {
+				border-color: rgba(0, 230, 118, 0.5);
+				box-shadow: 0 0 0 3px var(--accent-dim);
+			}
+
+			select option {
+				background: #0d1120;
+			}
+
+			/* ════════════════ BUTTONS ════════════════ */
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 7px;
+				border: none;
+				border-radius: var(--radius);
+				cursor: pointer;
+				font-family: var(--font);
+				font-size: 0.88rem;
+				font-weight: 600;
+				padding: 10px 18px;
+				transition: all 0.18s;
+				white-space: nowrap;
+			}
+
+			.btn:active {
+				transform: scale(0.97);
+			}
+
+			.btn-primary {
+				background: var(--accent);
+				color: #04120a;
+				width: 100%;
+				padding: 13px;
+				font-size: 0.95rem;
+				font-weight: 700;
+				box-shadow: 0 0 24px var(--accent-glow);
+			}
+
+			.btn-primary:hover {
+				background: #1ffb86;
+				box-shadow: 0 0 36px rgba(0, 230, 118, 0.45);
+			}
+
+			.btn-ghost {
+				background: var(--surface2);
+				border: 1px solid var(--border);
+				color: var(--text);
+			}
+
+			.btn-ghost:hover {
+				background: rgba(255, 255, 255, 0.1);
+				border-color: rgba(255, 255, 255, 0.12);
+			}
+
+			.btn-green {
+				background: var(--accent-dim);
+				border: 1px solid var(--border2);
+				color: var(--accent);
+			}
+
+			.btn-green:hover {
+				background: rgba(0, 230, 118, 0.2);
+			}
+
+			.btn-red {
+				background: rgba(255, 77, 109, 0.12);
+				border: 1px solid rgba(255, 77, 109, 0.25);
+				color: var(--red);
+			}
+
+			.btn-red:hover {
+				background: rgba(255, 77, 109, 0.2);
+			}
+
+			.btn-yellow {
+				background: rgba(255, 209, 102, 0.12);
+				border: 1px solid rgba(255, 209, 102, 0.25);
+				color: var(--yellow);
+			}
+
+			.btn-yellow:hover {
+				background: rgba(255, 209, 102, 0.2);
+			}
+
+			.btn-sm {
+				padding: 7px 13px;
+				font-size: 0.8rem;
+			}
+
+			/* ════════════════ APP SHELL ════════════════ */
+			#app {
+				display: none;
+				flex-direction: column;
+				min-height: 100vh;
+			}
+
+			header {
+				position: sticky;
+				top: 0;
+				z-index: 100;
+				background: rgba(6, 9, 15, 0.85);
+				backdrop-filter: blur(20px);
+				border-bottom: 1px solid var(--border);
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0 32px;
+				height: 64px;
+			}
+
+			.logo {
+				font-size: 1.05rem;
+				font-weight: 800;
+				letter-spacing: -0.01em;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.logo-icon {
+				width: 32px;
+				height: 32px;
+				background: var(--accent);
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 0.85rem;
+				color: #04120a;
+				font-weight: 900;
+				box-shadow: 0 0 16px var(--accent-glow);
+			}
+
+			.logo span {
+				color: var(--accent);
+			}
+
+			.header-right {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+			}
+
+			.online-dot {
+				display: flex;
+				align-items: center;
+				gap: 7px;
+				color: var(--muted2);
+				font-size: 0.82rem;
+			}
+
+			.online-dot::before {
+				content: '';
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: var(--accent);
+				box-shadow: 0 0 8px var(--accent);
+			}
+
+			/* ════════════════ NAV ════════════════ */
+			nav {
+				background: rgba(6, 9, 15, 0.6);
+				border-bottom: 1px solid var(--border);
+				display: flex;
+				padding: 0 32px;
+				gap: 2px;
+			}
+
+			.nav-tab {
+				background: none;
+				border: none;
+				border-bottom: 2px solid transparent;
+				color: var(--muted2);
+				cursor: pointer;
+				font-family: var(--font);
+				font-size: 0.87rem;
+				font-weight: 500;
+				padding: 16px 20px 14px;
+				transition:
+					color 0.15s,
+					border-color 0.15s;
+				position: relative;
+			}
+
+			.nav-tab:hover {
+				color: var(--text);
+			}
+
+			.nav-tab.active {
+				color: var(--accent);
+				border-bottom-color: var(--accent);
+			}
+
+			/* ════════════════ MAIN ════════════════ */
+			main {
+				flex: 1;
+				padding: 32px;
+				max-width: 1280px;
+				margin: 0 auto;
+				width: 100%;
+			}
+
+			.page {
+				display: none;
+				animation: fade-in 0.2s ease;
+			}
+			.page.active {
+				display: block;
+			}
+
+			@keyframes fade-in {
+				from {
+					opacity: 0;
+					transform: translateY(8px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			/* ════════════════ SECTION HEADER ════════════════ */
+			.section-header {
+				display: flex;
+				align-items: flex-end;
+				justify-content: space-between;
+				margin-bottom: 24px;
+			}
+
+			.section-header h2 {
+				font-size: 1.4rem;
+				font-weight: 800;
+				letter-spacing: -0.02em;
+			}
+
+			.section-header h2 span {
+				color: var(--accent);
+			}
+
+			.section-header p {
+				color: var(--muted2);
+				font-size: 0.85rem;
+				margin-top: 3px;
+			}
+
+			/* ════════════════ STATS ════════════════ */
+			.stats-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+				gap: 14px;
+				margin-bottom: 28px;
+			}
+
+			.stat-card {
+				background: var(--surface);
+				border: 1px solid var(--border);
+				border-radius: var(--radius);
+				padding: 20px;
+				position: relative;
+				overflow: hidden;
+				transition: border-color 0.2s;
+			}
+
+			.stat-card:hover {
+				border-color: rgba(255, 255, 255, 0.12);
+			}
+
+			.stat-card::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 2px;
+				background: var(--glow-color, var(--accent));
+				opacity: 0.7;
+			}
+
+			.stat-card .stat-label {
+				color: var(--muted2);
+				font-size: 0.73rem;
+				font-weight: 600;
+				letter-spacing: 0.07em;
+				text-transform: uppercase;
+				margin-bottom: 10px;
+			}
+
+			.stat-card .stat-value {
+				font-size: 2.2rem;
+				font-weight: 800;
+				letter-spacing: -0.03em;
+				line-height: 1;
+				color: var(--glow-color, var(--text));
+			}
+
+			/* ════════════════ TABLE ════════════════ */
+			.table-wrap {
+				border-radius: var(--radius);
+				border: 1px solid var(--border);
+				overflow: hidden;
+				overflow-x: auto;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 0.875rem;
+			}
+
+			thead {
+				background: rgba(255, 255, 255, 0.03);
+			}
+
+			th {
+				color: var(--muted2);
+				font-size: 0.72rem;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				padding: 13px 18px;
+				text-align: left;
+				text-transform: uppercase;
+			}
+
+			td {
+				border-top: 1px solid var(--border);
+				padding: 14px 18px;
+				vertical-align: middle;
+				color: var(--text);
+			}
+
+			tbody tr {
+				transition: background 0.12s;
+			}
+			tbody tr:hover td {
+				background: rgba(255, 255, 255, 0.03);
+			}
+
+			td.muted {
+				color: var(--muted2);
+			}
+
+			/* ════════════════ BADGES ════════════════ */
+			.badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 5px;
+				border-radius: 99px;
+				font-size: 0.72rem;
+				font-weight: 700;
+				letter-spacing: 0.05em;
+				padding: 4px 11px;
+				text-transform: uppercase;
+			}
+
+			.badge::before {
+				content: '';
+				width: 5px;
+				height: 5px;
+				border-radius: 50%;
+				background: currentColor;
+				opacity: 0.9;
+			}
+
+			.badge-green {
+				background: rgba(0, 230, 118, 0.1);
+				color: #00e676;
+				border: 1px solid rgba(0, 230, 118, 0.2);
+			}
+			.badge-blue {
+				background: rgba(77, 159, 255, 0.1);
+				color: #4d9fff;
+				border: 1px solid rgba(77, 159, 255, 0.2);
+			}
+			.badge-yellow {
+				background: rgba(255, 209, 102, 0.1);
+				color: #ffd166;
+				border: 1px solid rgba(255, 209, 102, 0.2);
+			}
+			.badge-red {
+				background: rgba(255, 77, 109, 0.1);
+				color: #ff4d6d;
+				border: 1px solid rgba(255, 77, 109, 0.2);
+			}
+
+			/* ════════════════ SEARCH BAR ════════════════ */
+			.search-bar {
+				display: flex;
+				gap: 10px;
+				margin-bottom: 20px;
+			}
+
+			.search-bar input {
+				flex: 1;
+			}
+
+			/* ════════════════ CARD ════════════════ */
+			.card {
+				background: var(--surface);
+				border: 1px solid var(--border);
+				border-radius: var(--radius);
+				padding: 22px;
+				margin-bottom: 16px;
+			}
+
+			/* ════════════════ MODAL ════════════════ */
+			.modal-overlay {
+				display: none;
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.7);
+				backdrop-filter: blur(6px);
+				align-items: center;
+				justify-content: center;
+				z-index: 300;
+				padding: 20px;
+			}
+
+			.modal-overlay.open {
+				display: flex;
+				animation: fade-in 0.15s ease;
+			}
+
+			.modal {
+				background: #0d1120;
+				border: 1px solid var(--border);
+				border-radius: 18px;
+				padding: 32px;
+				width: 100%;
+				max-width: 460px;
+				position: relative;
+				box-shadow:
+					0 40px 100px rgba(0, 0, 0, 0.7),
+					0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+			}
+
+			.modal-top {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 24px;
+			}
+
+			.modal-top h3 {
+				font-size: 1.15rem;
+				font-weight: 700;
+			}
+
+			.modal-close {
+				background: var(--surface2);
+				border: 1px solid var(--border);
+				border-radius: 8px;
+				color: var(--muted2);
+				cursor: pointer;
+				font-size: 1rem;
+				width: 32px;
+				height: 32px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: all 0.15s;
+			}
+
+			.modal-close:hover {
+				color: var(--text);
+				background: var(--surface2);
+			}
+
+			.modal-info {
+				background: var(--accent-dim);
+				border: 1px solid var(--border2);
+				border-radius: 8px;
+				color: var(--accent);
+				font-size: 0.83rem;
+				padding: 9px 13px;
+				margin-bottom: 20px;
+			}
+
+			.modal-actions {
+				display: flex;
+				gap: 10px;
+				justify-content: flex-end;
+				margin-top: 26px;
+			}
+
+			/* ════════════════ EMPTY ════════════════ */
+			.empty {
+				color: var(--muted);
+				font-size: 0.9rem;
+				padding: 52px;
+				text-align: center;
+			}
+
+			/* ════════════════ TOAST ════════════════ */
+			#toast-container {
+				position: fixed;
+				bottom: 24px;
+				right: 24px;
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				z-index: 999;
+			}
+
+			.toast {
+				background: #0d1120;
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				color: var(--text);
+				font-size: 0.88rem;
+				font-weight: 500;
+				padding: 13px 18px 13px 16px;
+				min-width: 260px;
+				max-width: 340px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+				animation: slide-up 0.2s ease;
+			}
+
+			.toast-dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				flex-shrink: 0;
+				background: var(--accent);
+				box-shadow: 0 0 8px var(--accent);
+			}
+
+			.toast.error .toast-dot {
+				background: var(--red);
+				box-shadow: 0 0 8px var(--red);
+			}
+			.toast.success .toast-dot {
+				background: var(--accent);
+				box-shadow: 0 0 8px var(--accent);
+			}
+
+			@keyframes slide-up {
+				from {
+					transform: translateY(16px);
+					opacity: 0;
+				}
+				to {
+					transform: translateY(0);
+					opacity: 1;
+				}
+			}
+
+			/* ════════════════ LOGIN ERROR ════════════════ */
+			.login-err {
+				background: rgba(255, 77, 109, 0.1);
+				border: 1px solid rgba(255, 77, 109, 0.25);
+				border-radius: 8px;
+				color: var(--red);
+				font-size: 0.84rem;
+				padding: 10px 14px;
+				margin-bottom: 14px;
+				display: none;
+			}
+
+			/* ════════════════ DIVIDER ════════════════ */
+			.divider {
+				border: none;
+				border-top: 1px solid var(--border);
+				margin: 24px 0;
+			}
+
+			/* ════════════════ ACTION BTNS IN TABLE ════════════════ */
+			.action-group {
+				display: flex;
+				gap: 8px;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- ══════════════════════════ LOGIN ══════════════════════════ -->
+		<div id="login-screen">
+			<div class="login-wrap">
+				<div class="login-badge">.</div>
+				<div class="login-card">
+					<h1>Hardware<span>Ctrl</span></h1>
+					<p class="sub">Controle de ativos</p>
+
+					<div class="field">
+						<label>Usuário</label>
+						<input
+							id="login-user"
+							type="text"
+							placeholder="Admin"
+							autocomplete="username"
+						/>
+					</div>
+					<div class="field">
+						<label>Senha</label>
+						<input
+							id="login-pass"
+							type="password"
+							placeholder="••••••••"
+							autocomplete="current-password"
+						/>
+					</div>
+
+					<div class="login-err" id="login-err"></div>
+
+					<button class="btn btn-primary" onclick="doLogin()">Entrar no Sistema</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- ══════════════════════════ APP ══════════════════════════ -->
+		<div id="app">
+			<header>
+				<div class="logo">
+					<div class="logo-icon">H</div>
+					Hardware<span>Ctrl</span>
+				</div>
+				<div class="header-right">
+					<div class="online-dot" id="header-user">Admin</div>
+					<button class="btn btn-ghost btn-sm" onclick="doLogout()">Sair</button>
+				</div>
+			</header>
+
+			<nav>
+				<button class="nav-tab active" onclick="showPage('ativos', this)">Ativos</button>
+				<button class="nav-tab" onclick="showPage('colaboradores', this)">
+					Colaboradores
+				</button>
+				<button class="nav-tab" onclick="showPage('movimentacoes', this)">
+					Movimentações
+				</button>
+			</nav>
+
+			<main>
+				<!-- ── ATIVOS ── -->
+				<div id="page-ativos" class="page active">
+					<div class="stats-grid" id="stats-ativos"></div>
+
+					<div class="section-header">
+						<div>
+							<h2>Gestão de <span>Ativos</span></h2>
+							<p>Equipamentos, dispositivos e periféricos</p>
+						</div>
+						<button class="btn btn-green" onclick="openModal('modal-novo-ativo')">
+							<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+								<path
+									d="M7 1v12M1 7h12"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+								/>
+							</svg>
+							Novo Ativo
+						</button>
+					</div>
+
+					<div class="search-bar">
+						<input
+							id="busca-ativo-input"
+							type="text"
+							placeholder="Buscar por nome ou código..."
+						/>
+						<button class="btn btn-ghost" onclick="buscarAtivos()">Buscar</button>
+						<button class="btn btn-ghost" onclick="carregarAtivos()">Limpar</button>
+					</div>
+
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th>Código</th>
+									<th>Nome</th>
+									<th>Descrição</th>
+									<th>Status</th>
+									<th>Colaborador</th>
+									<th>Ações</th>
+								</tr>
+							</thead>
+							<tbody id="tbody-ativos">
+								<tr>
+									<td colspan="6" class="empty">Carregando...</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<!-- ── COLABORADORES ── -->
+				<div id="page-colaboradores" class="page">
+					<div class="section-header">
+						<div>
+							<h2>Gestão de <span>Colaboradores</span></h2>
+							<p>Funcionários e equipes cadastrados</p>
+						</div>
+					</div>
+
+					<div class="search-bar">
+						<input
+							id="busca-colab-input"
+							type="number"
+							placeholder="Buscar por ID..."
+						/>
+						<button class="btn btn-ghost" onclick="buscarColaborador()">Buscar</button>
+						<button class="btn btn-ghost" onclick="carregarColaboradores()">
+							Limpar
+						</button>
+					</div>
+
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th>ID</th>
+									<th>Nome</th>
+									<th>E-mail</th>
+									<th>Departamento</th>
+								</tr>
+							</thead>
+							<tbody id="tbody-colabs">
+								<tr>
+									<td colspan="4" class="empty">Carregando...</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<!-- ── MOVIMENTAÇÕES ── -->
+				<div id="page-movimentacoes" class="page">
+					<div class="section-header">
+						<div>
+							<h2>Histórico de <span>Movimentações</span></h2>
+							<p>Registros de entrega e devolução</p>
+						</div>
+						<button class="btn btn-ghost btn-sm" onclick="carregarMovimentacoes()">
+							↻ Atualizar
+						</button>
+					</div>
+
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Data / Hora</th>
+									<th>Tipo</th>
+									<th>Ativo</th>
+									<th>Colaborador</th>
+								</tr>
+							</thead>
+							<tbody id="tbody-movs">
+								<tr>
+									<td colspan="5" class="empty">Carregando...</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</main>
+		</div>
+
+		<!-- ══════════════════════════ MODAIS ══════════════════════════ -->
+
+		<!-- Novo Ativo -->
+		<div class="modal-overlay" id="modal-novo-ativo">
+			<div class="modal">
+				<div class="modal-top">
+					<h3>Cadastrar Novo Ativo</h3>
+					<button class="modal-close" onclick="closeModal('modal-novo-ativo')">✕</button>
+				</div>
+				<div class="field">
+					<label>Código do Ativo</label>
+					<input id="na-codigo" type="number" placeholder="Ex: 1001" />
+				</div>
+				<div class="field">
+					<label>Nome</label>
+					<input id="na-nome" type="text" placeholder="Ex: Notebook Dell Latitude" />
+				</div>
+				<div class="field">
+					<label>Descrição</label>
+					<input
+						id="na-desc"
+						type="text"
+						placeholder="Ex: Intel i7, 16GB RAM, SSD 512GB"
+					/>
+				</div>
+				<div class="modal-actions">
+					<button class="btn btn-ghost" onclick="closeModal('modal-novo-ativo')">
+						Cancelar
+					</button>
+					<button class="btn btn-green" onclick="criarAtivo()">Criar Ativo</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Entrega -->
+		<div class="modal-overlay" id="modal-entrega">
+			<div class="modal">
+				<div class="modal-top">
+					<h3>Registrar Entrega</h3>
+					<button class="modal-close" onclick="closeModal('modal-entrega')">✕</button>
+				</div>
+				<div class="modal-info" id="entrega-info"></div>
+				<input type="hidden" id="entrega-codigo" />
+				<div class="field">
+					<label>ID do Colaborador</label>
+					<input id="entrega-colab" type="number" placeholder="Ex: 3" />
+				</div>
+				<div class="modal-actions">
+					<button class="btn btn-ghost" onclick="closeModal('modal-entrega')">
+						Cancelar
+					</button>
+					<button class="btn btn-green" onclick="registrarEntrega()">
+						Confirmar Entrega
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Devolução -->
+		<div class="modal-overlay" id="modal-devolucao">
+			<div class="modal">
+				<div class="modal-top">
+					<h3>Registrar Devolução</h3>
+					<button class="modal-close" onclick="closeModal('modal-devolucao')">✕</button>
+				</div>
+				<div class="modal-info" id="dev-info"></div>
+				<input type="hidden" id="dev-codigo" />
+				<div class="field">
+					<label>Status após devolução</label>
+					<select id="dev-status">
+						<option value="DISPONIVEL">Disponível</option>
+						<option value="MANUTENCAO">Manutenção</option>
+						<option value="DESCARTE">Descarte</option>
+					</select>
+				</div>
+				<div class="modal-actions">
+					<button class="btn btn-ghost" onclick="closeModal('modal-devolucao')">
+						Cancelar
+					</button>
+					<button class="btn btn-yellow" onclick="registrarDevolucao()">
+						Confirmar Devolução
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Toasts -->
+		<div id="toast-container"></div>
+
+		<!-- ══════════════════════════ SCRIPT ══════════════════════════ -->
+		<script>
+			const API = 'http://localhost:8000';
+			let TOKEN = localStorage.getItem('hw_token') || '';
+
+			/* ═══════ UTILS ═══════ */
+
+			function toast(msg, type = 'info') {
+				const el = document.createElement('div');
+				el.className = `toast ${type}`;
+				el.innerHTML = `<div class="toast-dot"></div><span>${msg}</span>`;
+				document.getElementById('toast-container').appendChild(el);
+				setTimeout(() => {
+					el.style.opacity = '0';
+					el.style.transform = 'translateY(8px)';
+					el.style.transition = '.2s';
+					setTimeout(() => el.remove(), 200);
+				}, 3200);
+			}
+
+			function openModal(id) {
+				document.getElementById(id).classList.add('open');
+			}
+			function closeModal(id) {
+				document.getElementById(id).classList.remove('open');
+			}
+
+			function showPage(name, btn) {
+				document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'));
+				document.querySelectorAll('.nav-tab').forEach((b) => b.classList.remove('active'));
+				document.getElementById('page-' + name).classList.add('active');
+				btn.classList.add('active');
+				if (name === 'ativos') carregarAtivos();
+				if (name === 'colaboradores') carregarColaboradores();
+				if (name === 'movimentacoes') carregarMovimentacoes();
+			}
+
+			async function apiFetch(path, opts = {}) {
+				const res = await fetch(API + path, {
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: 'Bearer ' + TOKEN,
+					},
+					...opts,
+				});
+				if (res.status === 401) {
+					doLogout();
+					throw new Error('Sessão expirada');
+				}
+				const data = await res.json().catch(() => ({}));
+				if (!res.ok) throw new Error(data.detail || 'Erro na requisição');
+				return data;
+			}
+
+			function statusBadge(s) {
+				const map = {
+					DISPONIVEL: ['badge-green', 'Disponível'],
+					EM_USO: ['badge-blue', 'Em Uso'],
+					MANUTENCAO: ['badge-yellow', 'Manutenção'],
+					DESCARTE: ['badge-red', 'Descarte'],
+				};
+				const [cls, label] = map[s] || ['badge-green', s];
+				return `<span class="badge ${cls}">${label}</span>`;
+			}
+
+			function tipoBadge(t) {
+				const map = {
+					ENTREGA: ['badge-blue', 'Entrega'],
+					DEVOLUCAO: ['badge-green', 'Devolução'],
+					MANUTENCAO: ['badge-yellow', 'Manutenção'],
+					DESCARTE: ['badge-red', 'Descarte'],
+				};
+				const [cls, label] = map[t] || ['badge-green', t];
+				return `<span class="badge ${cls}">${label}</span>`;
+			}
+
+			function fmtDate(d) {
+				if (!d) return '—';
+				return new Date(d).toLocaleString('pt-BR', {
+					day: '2-digit',
+					month: '2-digit',
+					year: 'numeric',
+					hour: '2-digit',
+					minute: '2-digit',
+				});
+			}
+
+			function esc(s) {
+				return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+			}
+
+			/* ═══════ AUTH ═══════ */
+
+			async function doLogin() {
+				const username = document.getElementById('login-user').value.trim();
+				const senha = document.getElementById('login-pass').value;
+				const errEl = document.getElementById('login-err');
+				errEl.style.display = 'none';
+
+				try {
+					const res = await fetch(API + '/login', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ username, senha }),
+					});
+					const data = await res.json();
+					if (!data.access_token) throw new Error(data.detail || 'Credenciais inválidas');
+
+					TOKEN = data.access_token;
+					localStorage.setItem('hw_token', TOKEN);
+					document.getElementById('header-user').textContent = username;
+
+					document.getElementById('login-screen').style.display = 'none';
+					document.getElementById('app').style.display = 'flex';
+					carregarAtivos();
+				} catch (e) {
+					errEl.textContent = e.message;
+					errEl.style.display = 'block';
+				}
+			}
+
+			function doLogout() {
+				TOKEN = '';
+				localStorage.removeItem('hw_token');
+				document.getElementById('login-screen').style.display = 'flex';
+				document.getElementById('app').style.display = 'none';
+			}
+
+			// Auto-login
+			(async () => {
+				if (!TOKEN) return;
+				try {
+					await apiFetch('/ativos');
+					document.getElementById('login-screen').style.display = 'none';
+					document.getElementById('app').style.display = 'flex';
+					carregarAtivos();
+				} catch {
+					TOKEN = '';
+					localStorage.removeItem('hw_token');
+				}
+			})();
+
+			document.addEventListener('keydown', (e) => {
+				if (
+					e.key === 'Enter' &&
+					document.getElementById('login-screen').style.display !== 'none'
+				)
+					doLogin();
+			});
+
+			/* ═══════ ATIVOS ═══════ */
+
+			async function carregarAtivos() {
+				try {
+					const ativos = await apiFetch('/ativos');
+					renderAtivos(ativos);
+					renderStats(ativos);
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
+			function renderStats(ativos) {
+				const count = (s) => ativos.filter((a) => a.status === s).length;
+				const cards = [
+					{ label: 'Total', value: ativos.length, color: '#e8ecf4' },
+					{ label: 'Disponíveis', value: count('DISPONIVEL'), color: '#00e676' },
+					{ label: 'Em Uso', value: count('EM_USO'), color: '#4d9fff' },
+					{ label: 'Manutenção', value: count('MANUTENCAO'), color: '#ffd166' },
+					{ label: 'Descarte', value: count('DESCARTE'), color: '#ff4d6d' },
+				];
+				document.getElementById('stats-ativos').innerHTML = cards
+					.map(
+						(c) => `
+      <div class="stat-card" style="--glow-color:${c.color}">
+        <div class="stat-label">${c.label}</div>
+        <div class="stat-value">${c.value}</div>
+      </div>
+    `,
+					)
+					.join('');
+			}
+
+			function renderAtivos(lista) {
+				const tbody = document.getElementById('tbody-ativos');
+				if (!lista.length) {
+					tbody.innerHTML =
+						'<tr><td colspan="6" class="empty">Nenhum ativo encontrado.</td></tr>';
+					return;
+				}
+				tbody.innerHTML = lista
+					.map(
+						(a) => `
+      <tr>
+        <td><code style="color:var(--accent);font-size:.8rem">#${a.codigo_ativo}</code></td>
+        <td><strong>${a.nome}</strong></td>
+        <td class="muted">${a.descricao || '—'}</td>
+        <td>${statusBadge(a.status)}</td>
+        <td>${a.colaborador ? a.colaborador.nome : '<span style="color:var(--muted)">—</span>'}</td>
+        <td>
+          <div class="action-group">
+            ${
+				a.status === 'DISPONIVEL' || a.status === 'MANUTENCAO' ?
+					`<button class="btn btn-sm btn-green" onclick="abrirEntrega(${a.codigo_ativo},'${esc(a.nome)}')">Entregar</button>`
+				:	''
+			}
+            ${
+				a.status === 'EM_USO' ?
+					`<button class="btn btn-sm btn-yellow" onclick="abrirDevolucao(${a.codigo_ativo},'${esc(a.nome)}')">Devolver</button>`
+				:	''
+			}
+          </div>
+        </td>
+      </tr>
+    `,
+					)
+					.join('');
+			}
+
+			async function buscarAtivos() {
+				const termo = document.getElementById('busca-ativo-input').value.trim();
+				if (!termo) {
+					carregarAtivos();
+					return;
+				}
+				try {
+					const res = await apiFetch('/ativos/busca', {
+						method: 'POST',
+						body: JSON.stringify({ termo }),
+					});
+					renderAtivos(Array.isArray(res) ? res : [res]);
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
+			async function criarAtivo() {
+				const codigo_ativo = parseInt(document.getElementById('na-codigo').value);
+				const nome = document.getElementById('na-nome').value.trim();
+				const descricao = document.getElementById('na-desc').value.trim();
+				if (!codigo_ativo || !nome || !descricao) {
+					toast('Preencha todos os campos', 'error');
+					return;
+				}
+				try {
+					await apiFetch('/ativos', {
+						method: 'POST',
+						body: JSON.stringify({ codigo_ativo, nome, descricao }),
+					});
+					toast('Ativo criado com sucesso!', 'success');
+					closeModal('modal-novo-ativo');
+					['na-codigo', 'na-nome', 'na-desc'].forEach(
+						(id) => (document.getElementById(id).value = ''),
+					);
+					carregarAtivos();
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
+			function abrirEntrega(codigo, nome) {
+				document.getElementById('entrega-codigo').value = codigo;
+				document.getElementById('entrega-info').textContent = `Ativo: ${nome} (#${codigo})`;
+				document.getElementById('entrega-colab').value = '';
+				openModal('modal-entrega');
+			}
+
+			async function registrarEntrega() {
+				const codigo_ativo = parseInt(document.getElementById('entrega-codigo').value);
+				const colaborador_id = parseInt(document.getElementById('entrega-colab').value);
+				if (!colaborador_id) {
+					toast('Informe o ID do colaborador', 'error');
+					return;
+				}
+				try {
+					await apiFetch('/entrega', {
+						method: 'POST',
+						body: JSON.stringify({ codigo_ativo, colaborador_id }),
+					});
+					toast('Entrega registrada com sucesso!', 'success');
+					closeModal('modal-entrega');
+					carregarAtivos();
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
+			function abrirDevolucao(codigo, nome) {
+				document.getElementById('dev-codigo').value = codigo;
+				document.getElementById('dev-info').textContent = `Ativo: ${nome} (#${codigo})`;
+				openModal('modal-devolucao');
+			}
+
+			async function registrarDevolucao() {
+				const codigo_ativo = parseInt(document.getElementById('dev-codigo').value);
+				const status = document.getElementById('dev-status').value;
+				try {
+					await apiFetch('/devolucao', {
+						method: 'POST',
+						body: JSON.stringify({ codigo_ativo, status }),
+					});
+					toast('Devolução registrada com sucesso!', 'success');
+					closeModal('modal-devolucao');
+					carregarAtivos();
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
+			/* ═══════ COLABORADORES ═══════ */
+
+			async function carregarColaboradores() {
+				try {
+					const lista = await apiFetch('/colaboradores');
+					renderColabs(lista);
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
+			function renderColabs(lista) {
+				const tbody = document.getElementById('tbody-colabs');
+				if (!lista || !lista.length) {
+					tbody.innerHTML =
+						'<tr><td colspan="4" class="empty">Nenhum colaborador encontrado.</td></tr>';
+					return;
+				}
+				tbody.innerHTML = lista
+					.map(
+						(c) => `
+      <tr>
+        <td><code style="color:var(--accent);font-size:.8rem">${c.id}</code></td>
+        <td><strong>${c.nome}</strong></td>
+        <td class="muted">${c.email || '—'}</td>
+        <td>${c.departamento ? `<span class="badge badge-blue">${c.departamento}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+      </tr>
+    `,
+					)
+					.join('');
+			}
+
+			async function buscarColaborador() {
+				const id = parseInt(document.getElementById('busca-colab-input').value);
+				if (!id) {
+					carregarColaboradores();
+					return;
+				}
+				try {
+					const c = await apiFetch('/colaboradores/busca', {
+						method: 'POST',
+						body: JSON.stringify({ colaborador_id: id }),
+					});
+					renderColabs([c]);
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
+			/* ═══════ MOVIMENTAÇÕES ═══════ */
+
+			async function carregarMovimentacoes() {
+				try {
+					const lista = await apiFetch('/movimentacoes');
+					const tbody = document.getElementById('tbody-movs');
+					if (!lista.length) {
+						tbody.innerHTML =
+							'<tr><td colspan="5" class="empty">Nenhuma movimentação registrada.</td></tr>';
+						return;
+					}
+					tbody.innerHTML = [...lista]
+						.reverse()
+						.map(
+							(m) => `
+        <tr>
+          <td class="muted" style="font-size:.78rem">#${m.id}</td>
+          <td class="muted" style="font-size:.84rem">${fmtDate(m.data_hora)}</td>
+          <td>${tipoBadge(m.tipo)}</td>
+          <td>
+            <code style="color:var(--accent);font-size:.78rem">#${m.codigo_ativo}</code>
+            ${m.ativo ? `<span style="color:var(--muted2);margin-left:6px;font-size:.84rem">${m.ativo.nome}</span>` : ''}
+          </td>
+          <td>${m.colaborador ? m.colaborador.nome : '<span style="color:var(--muted)">—</span>'}</td>
+        </tr>
+      `,
+						)
+						.join('');
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
+			/* ═══════ MODAL CLOSE ON OVERLAY ═══════ */
+			document.querySelectorAll('.modal-overlay').forEach((el) => {
+				el.addEventListener('click', (e) => {
+					if (e.target === el) el.classList.remove('open');
+				});
+			});
+		</script>
+	</body>
+</html>
