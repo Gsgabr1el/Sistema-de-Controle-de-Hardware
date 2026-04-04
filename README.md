@@ -11,17 +11,11 @@ Sistema acadêmico para controle de ativos (hardware/software), desenvolvido com
 - Sistema com foco em simplicidade e funcionamento especifico.
 
 
-## IMPORTANTE ##
-## Arquivo do banco de dados
+## Persistência de Dados
 
-O sistema gera automaticamente um arquivo local para armazenar os dados do banco SQLite. Esse arquivo não está incluído no `.gitignore`, então CUIDADO ao fazer commits!
+O banco de dados (SQLite) é gerado automaticamente no arquivo local `backend/database.db`. Por questões de segurança e boas práticas, este arquivo foi explicitamente adicionado ao `.gitignore` para evitar envio acidental de dados ou credenciais ao repositório.
 
-Ele guarda todas as informações cadastradas e transacionadas no sistema, como usuários, colaboradores, ativos e movimentações. Se esse arquivo for apagado, todos os dados armazenados nele também serão perdidos. Ao executar o sistema novamente, um novo arquivo de banco será criado automaticamente.
-
-
-
-
-
+Caso o arquivo `database.db` seja excluído do ambiente local, o sistema recriará automaticamente a estrutura de tabelas e o usuário administrador padrão na próxima execução inicial do servidor.
 
 ## Objetivo
 

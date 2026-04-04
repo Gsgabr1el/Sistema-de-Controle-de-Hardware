@@ -52,12 +52,12 @@ Esta é a tela principal onde você visualiza o resumo de inventário e a lista 
 Exibe a lista de todos os funcionários cadastrados na empresa e permite sua gestão completa.
 
 #### Funcionalidades:
-*   **Listagem Completa:** Veja ID, Nome, E-mail e Departamento.
+*   **Listagem Completa:** Exibe ID, Nome, E-mail e Departamento.
 *   **Visualização de Ativos:** Uma coluna exclusiva mostra todos os equipamentos que estão atualmente sob a responsabilidade de cada colaborador (Código e Nome do Ativo).
 *   **Cadastrar Novo Colaborador:** Clique em "+ Novo Colaborador" para adicionar um novo registro.
 *   **Editar Registro:** Clique no ícone de **Lápis** para alterar Nome, E-mail ou Departamento de um funcionário.
 *   **Excluir (Regra de Segurança):** Clique no ícone de **Lixeira** para remover um colaborador.
-    *   **Importante:** O sistema protege a integridade dos dados e **impede** a exclusão se o funcionário ainda possuir ativos vinculados. Você deve devolver os ativos antes de prosseguir com a exclusão.
+    *   **Importante:** O sistema protege a integridade dos dados e **impede** a exclusão se o funcionário ainda possuir ativos vinculados. É necessário registrar a devolução dos ativos antes de prosseguir com a exclusão.
 
 ### 3.3. Movimentações (Histórico)
 Registra todas as ações realizadas no sistema para fins de auditoria.
