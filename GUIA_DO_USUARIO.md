@@ -8,7 +8,7 @@ Este guia descreve como acessar e utilizar todas as funcionalidades do sistema A
 ## 1. Como Acessar a Aplicação
 
 A aplicação está disponível no seguinte endereço:
-**URL:** https://assetflow.onrender.com
+**URL:** https://assetflow-j9ix.onrender.com
 
 ### Requisitos
 * Navegador moderno (Chrome, Edge, Firefox).
