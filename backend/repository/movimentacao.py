@@ -46,37 +46,35 @@ def registrar_devolucao(db: Session, codigo_ativo: int, novo_status: StatusAtivo
     if not ativo:
         raise NotFoundError("Ativo não encontrado")
 
-    tipo_mov = TipoMovimentacao.DEVOLUCAO
-    colaborador_id = ativo.colaborador_id
+    if ativo.status == StatusAtivo.DESCARTE:
+        raise BadRequestError("Ativo descartado não pode ser movimentado")
 
-    if ativo.status == StatusAtivo.EM_USO:
+    # Regra básica: Se estiver sendo devolvido ou descartado, remove o vínculo
+    if novo_status in (StatusAtivo.DISPONIVEL, StatusAtivo.DESCARTE, StatusAtivo.MANUTENCAO):
         ativo.colaborador_id = None
 
-    elif ativo.status == StatusAtivo.DISPONIVEL:
-        if novo_status not in (StatusAtivo.MANUTENCAO, StatusAtivo.DESCARTE):
-            raise BadRequestError("Só é permitido mudar de DISPONIVEL para MANUTENCAO ou DESCARTE")
-
-    else:
-        if ativo.status == StatusAtivo.DESCARTE:
-            raise BadRequestError("Ativo descartado não pode ser movimentado")
-
-        if novo_status != StatusAtivo.DESCARTE:
-            raise BadRequestError("Transição inválida")
-
+    # Define o tipo de movimentação baseado no novo status
+    tipo_mov = TipoMovimentacao.DEVOLUCAO
     if novo_status == StatusAtivo.MANUTENCAO:
         tipo_mov = TipoMovimentacao.MANUTENCAO
     elif novo_status == StatusAtivo.DESCARTE:
         tipo_mov = TipoMovimentacao.DESCARTE
-        ativo.colaborador_id = None
 
+    # Atualiza o status
     ativo.status = novo_status
 
     mov = Movimentacao(
         tipo=tipo_mov,
         ativo_id=ativo.id,
         codigo_ativo=codigo_ativo,         
-        colaborador_id=colaborador_id       
+        colaborador_id=None # Na devolução/manutenção/descarte o vínculo se perde
     )
+
+    db.add(mov)
+    db.commit()
+    db.refresh(mov)
+
+    return mov
 
     db.add(mov)
     db.commit()

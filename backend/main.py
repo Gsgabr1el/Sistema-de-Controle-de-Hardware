@@ -1,14 +1,15 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Depends, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base
 from exceptions import DomainError, UnauthorizedError
 from repository.ativo import criar_ativo, listar_ativos, buscar_por_nome_ou_codigo
 from repository.movimentacao import registrar_entrega, registrar_devolucao, listar_movimentacoes
-from repository.colaboradores import create_colaboradores, listar_colaboradores, buscar_por_id
 from repository.usuario import buscar_por_username
 from auth.auth import verificar_senha, criar_token, verificar_token, criar_gestor_sistema
 from utils.datetime_utils import converter_horario
@@ -19,6 +20,18 @@ from schemas import (
     EntregaRequest,
     DevolucaoRequest,
     ColaboradorRequest,
+    ColaboradorCreateRequest,
+    ColaboradorUpdateRequest,
+    AtivoResponse,
+    ColaboradorResponse,
+)
+from repository.colaboradores import (
+    create_colaboradores,
+    listar_colaboradores,
+    buscar_por_id,
+    criar_colaborador,
+    editar_colaborador,
+    excluir_colaborador,
 )
 
 def inicializar_banco():
@@ -46,6 +59,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Caminho para a pasta frontend
+FRONTEND_PATH = os.path.join(os.path.dirname(__file__), "..", "frontend")
+
+@app.get("/")
+async def serve_index():
+    return FileResponse(os.path.join(FRONTEND_PATH, "index.html"))
 
 
 @app.exception_handler(DomainError)
@@ -94,12 +114,12 @@ def criar(payload: AtivoCreateRequest, db: Session = Depends(get_db), user=Depen
     descricao = payload.descricao
     return criar_ativo(db, nome, codigo_ativo, descricao)
 
-@app.post("/ativos/busca")
+@app.post("/ativos/busca", response_model=list[AtivoResponse])
 def buscar_ativos(payload: BuscaAtivoRequest, db: Session = Depends(get_db), user=Depends(verificar_token)):
     termo = payload.termo
     return buscar_por_nome_ou_codigo(db, termo)
 
-@app.get("/ativos")
+@app.get("/ativos", response_model=list[AtivoResponse])
 def listar_ativos_route(db: Session = Depends(get_db), user=Depends(verificar_token)):
     return listar_ativos(db)
 
@@ -119,7 +139,7 @@ def devolucao(payload: DevolucaoRequest, db: Session = Depends(get_db), user=Dep
 
 
  # Controle de Colaboradores/funcionarios 
-@app.get("/colaboradores")
+@app.get("/colaboradores", response_model=list[ColaboradorResponse])
 def listar_colaboradores_route(db: Session = Depends(get_db), user=Depends(verificar_token)):
     return listar_colaboradores(db)
 
@@ -127,6 +147,18 @@ def listar_colaboradores_route(db: Session = Depends(get_db), user=Depends(verif
 def buscar_colaborador_route(payload: ColaboradorRequest, db: Session = Depends(get_db), user=Depends(verificar_token)):
     colaborador_id = payload.colaborador_id
     return buscar_por_id(db, colaborador_id)
+
+@app.post("/colaboradores")
+def criar_colaborador_route(payload: ColaboradorCreateRequest, db: Session = Depends(get_db), user=Depends(verificar_token)):
+    return criar_colaborador(db, payload.nome, payload.email, payload.departamento)
+
+@app.put("/colaboradores/{id}")
+def editar_colaborador_route(id: int, payload: ColaboradorUpdateRequest, db: Session = Depends(get_db), user=Depends(verificar_token)):
+    return editar_colaborador(db, id, payload.nome, payload.email, payload.departamento)
+
+@app.delete("/colaboradores/{id}")
+def excluir_colaborador_route(id: int, db: Session = Depends(get_db), user=Depends(verificar_token)):
+    return excluir_colaborador(db, id)
 
 
 # Controle de Movimentações

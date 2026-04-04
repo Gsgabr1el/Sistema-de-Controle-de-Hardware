@@ -1,4 +1,4 @@
-from passlib.context import CryptContext
+import bcrypt
 from jose import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi import Depends
@@ -9,16 +9,19 @@ from exceptions import UnauthorizedError
 
 SECRET_KEY = "sistema-de-controle-de-hardware"
 ALGORITHM = "HS256"
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 
 def gerar_hash(senha: str):
-    return pwd_context.hash(senha)
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(senha.encode('utf-8'), salt).decode('utf-8')
 
 
 def verificar_senha(senha: str, hash: str):
-    return pwd_context.verify(senha, hash)
+    try:
+        return bcrypt.checkpw(senha.encode('utf-8'), hash.encode('utf-8'))
+    except Exception:
+        return False
 
 
 def criar_token(username: str):

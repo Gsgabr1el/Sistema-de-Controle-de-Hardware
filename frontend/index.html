@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>HardwareCtrl</title>
+		<title>AssetFlow</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -776,7 +776,7 @@
 			<div class="login-wrap">
 				<div class="login-badge">.</div>
 				<div class="login-card">
-					<h1>Hardware<span>Ctrl</span></h1>
+					<h1>Asset<span>Flow</span></h1>
 					<p class="sub">Controle de ativos</p>
 
 					<div class="field">
@@ -809,8 +809,8 @@
 		<div id="app">
 			<header>
 				<div class="logo">
-					<div class="logo-icon">H</div>
-					Hardware<span>Ctrl</span>
+					<div class="logo-icon">A</div>
+					Asset<span>Flow</span>
 				</div>
 				<div class="header-right">
 					<div class="online-dot" id="header-user">Admin</div>
@@ -889,6 +889,17 @@
 							<h2>Gestão de <span>Colaboradores</span></h2>
 							<p>Funcionários e equipes cadastrados</p>
 						</div>
+						<button class="btn btn-green" onclick="openModal('modal-novo-colab')">
+							<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+								<path
+									d="M7 1v12M1 7h12"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+								/>
+							</svg>
+							Novo Colaborador
+						</button>
 					</div>
 
 					<div class="search-bar">
@@ -911,6 +922,8 @@
 									<th>Nome</th>
 									<th>E-mail</th>
 									<th>Departamento</th>
+									<th>Ativos</th>
+									<th>Ações</th>
 								</tr>
 							</thead>
 							<tbody id="tbody-colabs">
@@ -1042,12 +1055,73 @@
 			</div>
 		</div>
 
+		<!-- Novo Colaborador -->
+		<div class="modal-overlay" id="modal-novo-colab">
+			<div class="modal">
+				<div class="modal-top">
+					<h3>Cadastrar Novo Colaborador</h3>
+					<button class="modal-close" onclick="closeModal('modal-novo-colab')">✕</button>
+				</div>
+				<div class="field">
+					<label>Nome Completo</label>
+					<input id="nc-nome" type="text" placeholder="Ex: João Silva" />
+				</div>
+				<div class="field">
+					<label>E-mail</label>
+					<input id="nc-email" type="email" placeholder="Ex: joao@empresa.com" />
+				</div>
+				<div class="field">
+					<label>Departamento</label>
+					<input id="nc-depto" type="text" placeholder="Ex: TI, RH, Vendas" />
+				</div>
+				<div class="modal-actions">
+					<button class="btn btn-ghost" onclick="closeModal('modal-novo-colab')">
+						Cancelar
+					</button>
+					<button class="btn btn-green" onclick="criarColaborador()">
+						Criar Colaborador
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Editar Colaborador -->
+		<div class="modal-overlay" id="modal-edit-colab">
+			<div class="modal">
+				<div class="modal-top">
+					<h3>Editar Colaborador</h3>
+					<button class="modal-close" onclick="closeModal('modal-edit-colab')">✕</button>
+				</div>
+				<input type="hidden" id="ec-id" />
+				<div class="field">
+					<label>Nome Completo</label>
+					<input id="ec-nome" type="text" />
+				</div>
+				<div class="field">
+					<label>E-mail</label>
+					<input id="ec-email" type="email" />
+				</div>
+				<div class="field">
+					<label>Departamento</label>
+					<input id="ec-depto" type="text" />
+				</div>
+				<div class="modal-actions">
+					<button class="btn btn-ghost" onclick="closeModal('modal-edit-colab')">
+						Cancelar
+					</button>
+					<button class="btn btn-green" onclick="salvarEdicaoColaborador()">
+						Salvar Alterações
+					</button>
+				</div>
+			</div>
+		</div>
+
 		<!-- Toasts -->
 		<div id="toast-container"></div>
 
 		<!-- ══════════════════════════ SCRIPT ══════════════════════════ -->
 		<script>
-			const API = 'http://localhost:8000';
+			const API = window.location.origin;
 			let TOKEN = localStorage.getItem('hw_token') || '';
 
 			/* ═══════ UTILS ═══════ */
@@ -1247,8 +1321,13 @@
         <td>
           <div class="action-group">
             ${
-				a.status === 'DISPONIVEL' || a.status === 'MANUTENCAO' ?
+				a.status === 'DISPONIVEL' ?
 					`<button class="btn btn-sm btn-green" onclick="abrirEntrega(${a.codigo_ativo},'${esc(a.nome)}')">Entregar</button>`
+				:	''
+			}
+            ${
+				a.status === 'MANUTENCAO' ?
+					`<button class="btn btn-sm btn-green" onclick="registrarDevolucaoRapida(${a.codigo_ativo}, 'DISPONIVEL')">Concluir Manutenção</button>`
 				:	''
 			}
             ${
@@ -1332,6 +1411,19 @@
 				}
 			}
 
+			async function registrarDevolucaoRapida(codigo_ativo, novo_status) {
+				try {
+					await apiFetch('/devolucao', {
+						method: 'POST',
+						body: JSON.stringify({ codigo_ativo, status: novo_status }),
+					});
+					toast('Manutenção finalizada! Ativo disponível.', 'success');
+					carregarAtivos();
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
 			function abrirDevolucao(codigo, nome) {
 				document.getElementById('dev-codigo').value = codigo;
 				document.getElementById('dev-info').textContent = `Ativo: ${nome} (#${codigo})`;
@@ -1369,7 +1461,7 @@
 				const tbody = document.getElementById('tbody-colabs');
 				if (!lista || !lista.length) {
 					tbody.innerHTML =
-						'<tr><td colspan="4" class="empty">Nenhum colaborador encontrado.</td></tr>';
+						'<tr><td colspan="6" class="empty">Nenhum colaborador encontrado.</td></tr>';
 					return;
 				}
 				tbody.innerHTML = lista
@@ -1380,10 +1472,95 @@
         <td><strong>${c.nome}</strong></td>
         <td class="muted">${c.email || '—'}</td>
         <td>${c.departamento ? `<span class="badge badge-blue">${c.departamento}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+        <td>
+          ${
+				c.ativos && c.ativos.length > 0 ?
+					c.ativos
+						.map(
+							(a) =>
+								`<div style="font-size:.75rem;margin-bottom:2px"><code style="color:var(--accent)">#${a.codigo_ativo}</code> ${a.nome}</div>`,
+						)
+						.join('')
+				:	'<span style="color:var(--muted);font-size:.75rem">Nenhum</span>'
+			}
+        </td>
+        <td>
+          <div class="action-group">
+            <button class="btn btn-sm btn-ghost" onclick="abrirEditarColaborador(${c.id}, '${esc(c.nome)}', '${esc(c.email)}', '${esc(c.departamento)}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </button>
+            <button class="btn btn-sm btn-red" onclick="excluirColaborador(${c.id}, '${esc(c.nome)}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        </td>
       </tr>
     `,
 					)
 					.join('');
+			}
+
+			async function criarColaborador() {
+				const nome = document.getElementById('nc-nome').value.trim();
+				const email = document.getElementById('nc-email').value.trim();
+				const departamento = document.getElementById('nc-depto').value.trim();
+
+				if (!nome || !email || !departamento) {
+					toast('Preencha todos os campos', 'error');
+					return;
+				}
+
+				try {
+					await apiFetch('/colaboradores', {
+						method: 'POST',
+						body: JSON.stringify({ nome, email, departamento }),
+					});
+					toast('Colaborador cadastrado com sucesso!', 'success');
+					closeModal('modal-novo-colab');
+					['nc-nome', 'nc-email', 'nc-depto'].forEach((id) => (document.getElementById(id).value = ''));
+					carregarColaboradores();
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
+			function abrirEditarColaborador(id, nome, email, depto) {
+				document.getElementById('ec-id').value = id;
+				document.getElementById('ec-nome').value = nome;
+				document.getElementById('ec-email').value = email;
+				document.getElementById('ec-depto').value = depto;
+				openModal('modal-edit-colab');
+			}
+
+			async function salvarEdicaoColaborador() {
+				const id = document.getElementById('ec-id').value;
+				const nome = document.getElementById('ec-nome').value.trim();
+				const email = document.getElementById('ec-email').value.trim();
+				const departamento = document.getElementById('ec-depto').value.trim();
+
+				try {
+					await apiFetch(`/colaboradores/${id}`, {
+						method: 'PUT',
+						body: JSON.stringify({ nome, email, departamento }),
+					});
+					toast('Colaborador atualizado!', 'success');
+					closeModal('modal-edit-colab');
+					carregarColaboradores();
+				} catch (e) {
+					toast(e.message, 'error');
+				}
+			}
+
+			async function excluirColaborador(id, nome) {
+				if (!confirm(`Deseja realmente excluir o colaborador "${nome}"?`)) return;
+
+				try {
+					await apiFetch(`/colaboradores/${id}`, { method: 'DELETE' });
+					toast('Colaborador removido!', 'success');
+					carregarColaboradores();
+				} catch (e) {
+					toast(e.message, 'error'); // Aqui será exibido o erro da Opção A se houver ativos.
+				}
 			}
 
 			async function buscarColaborador() {

@@ -10,7 +10,7 @@ class Ativo(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     colaborador_id = Column(Integer, ForeignKey("colaboradores.id"), nullable=True)
-    colaborador = relationship("Colaborador")
+    colaborador = relationship("Colaborador", back_populates="ativos")
     codigo_ativo = Column(Integer, unique=True)
     nome = Column(String)
     descricao = Column(String)
