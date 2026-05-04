@@ -91,6 +91,8 @@ def normalizar_movimentacao(mov):
 
                             # ROTAS
 
+# Comentario de Alteração A5 Praticando
+
 
  # Controle de Acesso
 @app.post("/login")
