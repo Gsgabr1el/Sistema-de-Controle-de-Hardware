@@ -3,6 +3,9 @@ from sqlalchemy.exc import IntegrityError
 from models import Ativo, StatusAtivo
 from exceptions import ConflictError
 
+
+# Comentario de Alteração A5 Praticando
+
 def criar_ativo(db: Session, nome: str, codigo_ativo: int, descricao: str):
     existente = db.query(Ativo).filter(Ativo.codigo_ativo == codigo_ativo).first()
     if existente:
