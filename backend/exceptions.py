@@ -25,8 +25,3 @@ class ConflictError(DomainError):
     status_code = 409
     code = "CONFLICT"
 
-
-class UnauthorizedError(DomainError):
-    status_code = 401
-    code = "UNAUTHORIZED"
-

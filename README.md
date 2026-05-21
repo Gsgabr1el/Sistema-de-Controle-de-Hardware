@@ -163,17 +163,29 @@ Observação: exceto a rota `POST /login`, todas as demais rotas exigem token JW
 
 ### Instalação (Windows/Linux)
 
-1. Instale as dependências:
+1. Verifique a versão do Python no seu sistema:
+```bash
+python --version
+```
+Este projeto obrigatoriamente requer Python 3.10 ou superior.
+
+2. Se necessario crie e ative um ambiente virtual:
+
+python -m venv .venv
+source .venv/bin/activate
+
+
+3. Instale as dependências:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Inicie o servidor (da pasta raiz do projeto):
+4. Inicie o servidor (da pasta raiz do projeto):
 ```bash
-python -m uvicorn backend.main:app --reload
+PYTHONPATH=backend python -m uvicorn backend.main:app --reload
 ```
 
-3. Acesse no navegador:
+5. Acesse no navegador:
 - Aplicação: `http://localhost:8000`
 - Documentação API (Swagger): `http://localhost:8000/docs`
 

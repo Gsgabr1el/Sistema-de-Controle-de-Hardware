@@ -3,10 +3,6 @@ from models import Colaborador, Ativo
 from exceptions import DomainError
 
 
-def create_colaboradores(db: Session):
-    pass
-
-
 def listar_colaboradores(db: Session):
     return db.query(Colaborador).options(joinedload(Colaborador.ativos)).all()
 

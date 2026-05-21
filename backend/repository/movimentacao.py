@@ -76,12 +76,5 @@ def registrar_devolucao(db: Session, codigo_ativo: int, novo_status: StatusAtivo
 
     return mov
 
-    db.add(mov)
-    db.commit()
-    db.refresh(mov)
-
-    return mov
-
-
 def listar_movimentacoes(db: Session):
     return db.query(Movimentacao).order_by(Movimentacao.data_hora.desc()).all()
